@@ -26,7 +26,7 @@ python3 -m http.server 8000
 ## 实现要点
 
 - motion 的 `pathLength: 0 -> 1` 通过 `stroke-dasharray = pathLength`、`stroke-dashoffset` 从全长动画到 0 复刻；每条 path 的 `duration` / `delay` / `ease` 以及 opacity 的时长都按参考组件原样保留（英文共 2 条 path，全程 3.5s）。
-- 写完前页面只有居中的字标；写完后底部淡入重播按钮。点击字标、按钮或按 `R` 均可重播。
+- 写完前页面只有居中的字标；写完后底部淡入 Replay 按钮。点击任意处、按钮或按 `R` 均可重播。
 - 支持 `prefers-reduced-motion`（reduce 时直接显示完成态）和无 JS 时的纯文本兜底。
 - 无框架、无构建、无外部请求。
 

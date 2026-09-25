@@ -21,6 +21,7 @@ body {
 body {
   background: var(--bg);
   color: var(--ink);
+  cursor: pointer;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
     "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -53,11 +54,10 @@ body::before {
 }
 
 #hello-svg {
-  height: clamp(84px, 20vw, 148px);
+  height: clamp(96px, 22vw, 168px);
   width: auto;
   max-width: 92vw;
   overflow: visible;
-  cursor: pointer;
   filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.12));
 }
 
