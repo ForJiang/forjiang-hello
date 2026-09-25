@@ -54,6 +54,7 @@
   var width = 0;
   var height = 0;
   var time = 0;
+  var lastDpr = 0;
 
   // The bitmap follows the canvas's CSS box (driven by CSS 100% / 100lvh);
   // no inline px is written here — the box changes with mobile toolbar
@@ -61,6 +62,7 @@
   function handleResize() {
     var rect = canvas.getBoundingClientRect();
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    lastDpr = dpr;
     width = Math.max(1, Math.round(rect.width));
     height = Math.max(1, Math.round(rect.height));
     canvas.width = Math.round(width * dpr);
@@ -99,6 +101,13 @@
   var invMaxHeight = 1 / (maxHeight + 55);
 
   function draw() {
+    // DPR changes (moving between displays, browser zoom) do not fire
+    // ResizeObserver — check every frame so the bitmap never goes stale
+    var dprNow = Math.min(window.devicePixelRatio || 1, 2);
+    if (dprNow !== lastDpr) {
+      handleResize();
+    }
+
     time += speed;
 
     mouse.x += (mouse.targetX - mouse.x) * 0.32;
@@ -110,16 +119,23 @@
     ctx.fillStyle = "#000000"; // pure black sky
     ctx.fillRect(0, 0, width, height);
 
-    var gridCols = Math.ceil(width / tileW) + 4;
-    var gridRows = Math.ceil(height / tileH) + 8;
-
     var originX = width * 0.5;
     var originY = height / 3.2;
 
-    var startR = -Math.floor(gridRows / 2);
-    var endR = Math.ceil(gridRows / 2);
-    var startC = -Math.floor(gridCols / 2);
-    var endC = Math.ceil(gridCols / 2);
+    // The iso grid spans a DIAMOND in screen space — a voxel maps to
+    // (originX + (c-r)*tileW, originY + (c+r)*tileH) — so a range sized from
+    // the viewport's side lengths leaves the corners uncovered (black wedges).
+    // Corner reach in both axes: |c-r| must reach maxA and |c+r| must reach
+    // maxB, and since c = (a+b)/2, r = (b-a)/2, both |c| and |r| need
+    // (maxA + maxB)/2. A small margin covers the pointer bump overshoot.
+    var maxA = Math.max(originX / tileW, (width - originX) / tileW);
+    var maxB = Math.max(originY / tileH, (height - originY) / tileH);
+    var half = Math.ceil((maxA + maxB) / 2) + 2;
+
+    var startR = -half;
+    var endR = half + 1;
+    var startC = -half;
+    var endC = half + 1;
 
     for (var r = startR; r < endR; r++) {
       for (var c = startC; c < endC; c++) {
