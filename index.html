@@ -3,18 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>ForJiang — hello</title>
-    <meta name="description" content="ForJiang 的打招呼页面：Apple Hello 手写描边动画。" />
-    <meta property="og:title" content="ForJiang — hello" />
-    <meta property="og:description" content="Hi, I'm Jiang — 一名热爱编程的高中生。" />
-    <meta property="og:type" content="website" />
+    <title>hello — ForJiang</title>
+    <meta name="description" content="Apple Hello 手写描边动画演示。" />
     <meta name="theme-color" content="#000000" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main class="stage" id="stage">
-      <!-- hello / xin chào 手写动画由 main.js 依据 hello-data.js 渲染 -->
+    <main class="stage">
+      <!-- hello 手写动画由 main.js 依据 hello-data.js 渲染 -->
       <svg
         id="hello-svg"
         xmlns="http://www.w3.org/2000/svg"
@@ -26,35 +23,19 @@
       >
         <title>hello</title>
       </svg>
-
-      <section class="reveal" id="reveal" aria-hidden="true">
-        <h1 class="name">ForJiang</h1>
-        <p class="greeting">
-          你好，我是 Jiang —— 一名热爱编程的高中生。<br />
-          <span class="greeting-en">Hi, I'm Jiang — a high-school student who loves coding.</span>
-        </p>
-        <p class="links">
-          <a class="pill" href="https://github.com/ForJiang" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-          <a class="pill" href="https://forjiang.github.io" target="_blank" rel="noopener noreferrer">个人主页 ↗</a>
-        </p>
-        <p class="controls">
-          <button class="pill" id="replay" type="button">↻ 重播</button>
-          <span class="lang-toggle" role="group" aria-label="切换语言">
-            <button class="lang-opt is-active" type="button" data-word="en" aria-pressed="true">hello</button>
-            <button class="lang-opt" type="button" data-word="vn" aria-pressed="false">xin chào</button>
-          </span>
-        </p>
-      </section>
-
-      <footer class="footer">© 2026 ForJiang · 用 SVG 一笔一画写出来</footer>
-
-      <noscript>
-        <style>
-          .reveal { display: none; }
-        </style>
-        <p class="noscript-fallback">hello — I'm Jiang · github.com/ForJiang</p>
-      </noscript>
     </main>
+
+    <div class="dock" id="dock" aria-hidden="true">
+      <button class="pill" id="replay" type="button">↻ 重播</button>
+      <p class="hint">点击任意处或按 R 重播 · © 2026 ForJiang</p>
+    </div>
+
+    <noscript>
+      <style>
+        .dock { display: none; }
+      </style>
+      <p class="noscript-fallback">hello</p>
+    </noscript>
 
     <script src="assets/hello-data.js"></script>
     <script src="assets/main.js" defer></script>

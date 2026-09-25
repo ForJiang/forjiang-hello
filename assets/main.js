@@ -6,46 +6,35 @@
 (function () {
   var NS = "http://www.w3.org/2000/svg";
   var svg = document.getElementById("hello-svg");
-  var reveal = document.getElementById("reveal");
+  var dock = document.getElementById("dock");
   var replayBtn = document.getElementById("replay");
-  var langOpts = Array.prototype.slice.call(document.querySelectorAll(".lang-opt"));
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var currentWord = "en";
   var completeTimer = null;
 
-  function easeOf(ease) {
-    return ease === "easeInOut" ? "ease-in-out" : "ease-out";
-  }
-
-  function totalTime(word) {
-    var paths = HELLO_DATA[word].paths;
-    return paths.reduce(function (max, p) {
+  function totalTime() {
+    return HELLO_DATA.en.paths.reduce(function (max, p) {
       return Math.max(max, p.delay + p.dur);
     }, 0);
   }
 
-  function render(word) {
-    var data = HELLO_DATA[word];
-    currentWord = word;
+  function render() {
+    var data = HELLO_DATA.en;
 
     svg.setAttribute("viewBox", data.viewBox);
     svg.setAttribute("stroke-width", data.strokeWidth);
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     document.body.classList.remove("done");
-    reveal.setAttribute("aria-hidden", "true");
+    dock.setAttribute("aria-hidden", "true");
     window.clearTimeout(completeTimer);
 
     var paths = data.paths.map(function (p) {
       var el = document.createElementNS(NS, "path");
       el.setAttribute("d", p.d);
       el.setAttribute("stroke-linecap", "round");
-      if (p.cls === "stroke-yellow-400") {
-        el.setAttribute("stroke", "#facc15");
-      }
       el.style.setProperty("--dur", p.dur + "s");
       el.style.setProperty("--delay", p.delay + "s");
-      el.style.setProperty("--ease", easeOf(p.ease));
+      el.style.setProperty("--ease", p.ease === "easeInOut" ? "ease-in-out" : "ease-out");
       el.style.setProperty("--op-dur", p.opDur + "s");
       el.style.setProperty("--op-delay", p.opDelay + "s");
       svg.appendChild(el);
@@ -74,40 +63,31 @@
       el.classList.add("drawing");
     });
 
-    // 对应参考组件的 onAnimationComplete：最后一条 path 画完时揭示后续内容
-    completeTimer = window.setTimeout(finish, totalTime(word) * 1000 + 80);
+    // 对应参考组件的 onAnimationComplete：最后一条 path 画完时显示重播
+    completeTimer = window.setTimeout(finish, totalTime() * 1000 + 80);
   }
 
   function finish() {
     document.body.classList.add("done");
-    reveal.setAttribute("aria-hidden", "false");
+    dock.setAttribute("aria-hidden", "false");
   }
 
-  replayBtn.addEventListener("click", function () {
-    render(currentWord);
+  replayBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    render();
   });
 
-  langOpts.forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var word = btn.getAttribute("data-word");
-      langOpts.forEach(function (b) {
-        var active = b === btn;
-        b.classList.toggle("is-active", active);
-        b.setAttribute("aria-pressed", active ? "true" : "false");
-      });
-      if (word !== currentWord) {
-        render(word);
-      } else {
-        render(word); // 同词也重播，给用户即时反馈
-      }
-    });
+  // 点页面任意处都能重播（字标是空心描边，只监听 svg 会点不中）
+  document.addEventListener("click", function (e) {
+    if (e.target === replayBtn) return;
+    render();
   });
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "r" || e.key === "R") {
-      render(currentWord);
+      render();
     }
   });
 
-  render("en");
+  render();
 })();
