@@ -7,8 +7,6 @@
 (function () {
   var NS = "http://www.w3.org/2000/svg";
   var svg = document.getElementById("hello-svg");
-  var dock = document.getElementById("dock");
-  var replayBtn = document.getElementById("replay");
   var clockTime = document.getElementById("clock-time");
   var clockDate = document.getElementById("clock-date");
 
@@ -47,7 +45,6 @@
     svg.setAttribute("stroke-width", data.strokeWidth);
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     document.body.classList.remove("done");
-    dock.setAttribute("aria-hidden", "true");
     window.clearTimeout(completeTimer);
 
     var paths = data.paths.map(function (p) {
@@ -105,18 +102,11 @@
 
   function finish() {
     document.body.classList.add("done");
-    dock.setAttribute("aria-hidden", "false");
   }
-
-  replayBtn.addEventListener("click", function (e) {
-    e.stopPropagation();
-    render();
-  });
 
   // Clicking anywhere replays (the wordmark is a hollow stroke, so a listener
   // on the svg alone would miss clicks between the letters)
   document.addEventListener("click", function (e) {
-    if (e.target === replayBtn) return;
     render();
   });
 

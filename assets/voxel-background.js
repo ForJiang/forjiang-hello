@@ -50,12 +50,14 @@
     topColorLUT[i] = "rgb(" + r + "," + g + "," + b + ")";
   }
 
-  // Lit top-face palette for the wordmark light: 10 intensity steps x 101
+  // Lit top-face palette for the wordmark light: 24 intensity steps x 101
   // heights, each blended toward white. Pre-computed — zero allocations/frame.
-  var litTopLUT = new Array(10);
-  var litRightLUT = new Array(10);
-  for (var s = 0; s < 10; s++) {
-    var k = (s / 9) * 0.75; // blend factor toward white
+  // 24 steps (not 10) so the per-voxel light has no visible banding.
+  var LIGHT_STEPS = 24;
+  var litTopLUT = new Array(LIGHT_STEPS);
+  var litRightLUT = new Array(LIGHT_STEPS);
+  for (var s = 0; s < LIGHT_STEPS; s++) {
+    var k = (s / (LIGHT_STEPS - 1)) * 0.75; // blend factor toward white
     var col = new Array(101);
     for (var j = 0; j <= 100; j++) {
       var rr = Math.floor((baseRgb.r * (0.55 + (j / 100) * 0.45)) * (1 - k) + 255 * k);
@@ -241,7 +243,8 @@
         ctx.fillStyle = litStep ? litRightLUT[litStep] : rightFaceColor;
         ctx.fill();
 
-        // Wordmark light: elliptical falloff, quantized to a LUT step
+        // Wordmark light: elliptical falloff, quantized to a LUT step.
+        // Smoothstep gives a softer edge than a plain quadratic.
         var litStep = 0;
         if (lightOn) {
           var ldx = isoX - lx;
@@ -253,8 +256,9 @@
               var d2 = ndx * ndx + ndy * ndy;
               if (d2 < 1) {
                 var infl = 1 - Math.sqrt(d2);
-                // clamp to 1..9: litTopLUT has exactly 10 steps
-                litStep = 1 + Math.min(8, (infl * infl * lint * 8) | 0);
+                infl = infl * infl * (3 - 2 * infl); // smoothstep
+                // clamp to 1..LIGHT_STEPS-1: the LUT has exactly LIGHT_STEPS rows
+                litStep = 1 + Math.min(LIGHT_STEPS - 2, (infl * lint * (LIGHT_STEPS - 2)) | 0);
               }
             }
           }
@@ -279,6 +283,27 @@
         ctx.strokeStyle = wireColor;
         ctx.lineWidth = 0.6;
         ctx.stroke();
+      }
+    }
+
+    // Per-pixel light pool: an additive elliptical white gradient over the
+    // whole scene — smooth and free of voxel quantization — with a slow
+    // breathing so the light feels alive rather than static
+    if (lightOn) {
+      var breathe = 0.88 + 0.12 * Math.sin(time * 0.9);
+      var a0 = 0.1 * lint * breathe;
+      if (a0 > 0.004) {
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.translate(lx, ly);
+        ctx.scale(1, lry / lrx);
+        var grad = ctx.createRadialGradient(0, 0, 0, 0, 0, lrx);
+        grad.addColorStop(0, "rgba(255,255,255," + a0.toFixed(4) + ")");
+        grad.addColorStop(0.45, "rgba(255,255,255," + (a0 * 0.38).toFixed(4) + ")");
+        grad.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(-lrx, -lrx, lrx * 2, lrx * 2);
+        ctx.restore();
       }
     }
   }

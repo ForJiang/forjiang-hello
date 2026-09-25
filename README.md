@@ -21,8 +21,8 @@ Opening `index.html` directly also works (no external requests).
 - Fluorescent wordmark: three stacked white halo layers (CSS `drop-shadow`), so the strokes read as neon
 - Live clock below the wordmark: `HH:MM:SS` with the date, re-armed on every second boundary, in the same white glow treatment
 - Full-screen voxel topography background: an isometric grid with trigonometric height waves; voxels rise where the pointer passes (with eased follow)
-- **The wordmark is a real-time light source**: its glow also lands on the terrain — an elliptical falloff computed per voxel per frame, brightening the top and right faces through a pre-computed LUT. The light ramps up as the strokes draw themselves and intensifies up to 2x while the pointer lingers over the wordmark — the background visibly reacts to the foreground
-- Three ways to replay: click anywhere, click the `↻ Replay` button, or press `R`
+- **The wordmark is a real-time light source**: its glow lands on the terrain two ways — a per-voxel elliptical falloff (smoothstep, 24-step LUT) brightening the top and right faces, plus a per-pixel additive white gradient pool over the whole scene that is free of voxel quantization and breathes slowly. The light ramps up as the strokes draw themselves and intensifies up to 2x while the pointer lingers over the wordmark — the background visibly reacts to the foreground
+- Replay by clicking anywhere or pressing `R`
 - With `prefers-reduced-motion: reduce`, the background draws a single static frame and the wordmark shows its finished state without animating
 - Falls back to a plain "hello" text when JavaScript is disabled
 - No frameworks, no build, no external requests; all UI copy is English
