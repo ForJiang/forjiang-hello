@@ -19,7 +19,7 @@ body {
 }
 
 body {
-  background: #020617;
+  background: var(--bg);
   color: var(--ink);
   cursor: pointer;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
@@ -29,10 +29,12 @@ body {
   overflow-x: hidden;
 }
 
-/* ---------- 背景：体素地形网格 ---------- */
+/* ---------- Background: voxel topography grid ---------- */
 
-/* CSS 驱动尺寸：100lvh 取工具栏收起后的大视口高度，iOS 上画布天然高出可视区一截、
-   被裁掉也不露底；JS 只负责把盒子尺寸镜像成位图（见 voxel-background.js） */
+/* CSS drives the size: 100lvh is the large viewport height (toolbars collapsed),
+   so on iOS the canvas naturally overscans the visible area and is simply clipped
+   instead of leaving a gap; JS only mirrors the box into the bitmap
+   (see voxel-background.js) */
 #voxel-bg {
   position: fixed;
   top: 0;
@@ -43,7 +45,7 @@ body {
   display: block;
 }
 
-/* ---------- 舞台：hello 完全居中 ---------- */
+/* ---------- Stage: hello perfectly centered ---------- */
 
 .stage {
   position: relative;
@@ -54,6 +56,8 @@ body {
   justify-content: center;
   padding: 24px 20px;
 }
+
+/* ---------- Hand-drawn wordmark ---------- */
 
 #hello-svg {
   height: clamp(96px, 22vw, 168px);
@@ -67,7 +71,7 @@ body {
   stroke-dashoffset: var(--len, 0);
 }
 
-/* motion 的 pathLength: 0 -> 1 由 dashoffset 从全长走到 0 复刻 */
+/* Replicates motion's pathLength 0 -> 1: dashoffset runs from full length to 0 */
 #hello-svg path.drawing {
   animation:
     draw-path var(--dur) var(--ease) var(--delay) both,
@@ -92,7 +96,7 @@ body {
   }
 }
 
-/* ---------- 底部：写完后才出现的重播 ---------- */
+/* ---------- Bottom dock: replay appears after the drawing finishes ---------- */
 
 .dock {
   position: fixed;
@@ -162,7 +166,7 @@ body.done .dock {
   font-weight: 700;
 }
 
-/* 减少动态效果：直接展示完成态 */
+/* Reduced motion: show the finished state immediately */
 @media (prefers-reduced-motion: reduce) {
   .dock {
     transition: none;

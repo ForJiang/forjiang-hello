@@ -1,48 +1,48 @@
 # ForJiang — hello
 
-一个零依赖的纯静态演示页：靛蓝体素地形网格背景之上，居中用 SVG 描边动画"手写"出 **hello**（全程 3.5 秒），写完底部淡出重播入口。除此之外没有任何其他内容——它就是这一个动画的演示。
+A zero-dependency static demo page: over a full-screen indigo voxel topography grid, **hello** is hand-drawn stroke by stroke in the center (3.5 seconds), and a replay entry fades in at the bottom when it finishes. Nothing else on the page — it is a demo of this one animation.
 
-线上地址：**https://forjiang.github.io/forjiang-hello/**
+Live: **https://forjiang.github.io/forjiang-hello/**
 
-手写动画复刻自 Apple Hello 效果的 motion/react 组件（英文 hello 部分），背景复刻自 VoxelTopographyGrid React 组件——两者都移植为原生 JS，不依赖 React，无需构建，可直接托管在 GitHub Pages。
+The writing animation ports the Apple Hello motion/react component (the English "hello" variant); the background ports the VoxelTopographyGrid React component. Both are plain JavaScript ports — no React, no build step, ready for static hosting on GitHub Pages.
 
-## 本地预览
+## Local preview
 
 ```bash
 python3 -m http.server 8000
-# 打开 http://localhost:8000
+# open http://localhost:8000
 ```
 
-直接双击 `index.html` 也能跑（无任何外链资源）。
+Opening `index.html` directly also works (no external requests).
 
-## 功能
+## Features
 
-- 打开即播放 hello 手写描边动画，字标在视口中精确居中
-- 全屏体素地形背景：等距网格三角函数起伏，指针经过处体素隆起（带缓动跟随）
-- 三种重播方式：点击页面任意处、点击 `↻ Replay` 按钮、按 `R` 键
-- `prefers-reduced-motion` 为 reduce 时，背景只绘一帧静态地形、字标直接展示完成态
-- 无 JS 环境下降级为纯文本 "hello"
-- 无框架、无构建、无外部请求；界面文案为英文
+- Plays the hello handwriting animation on load, with the wordmark perfectly centered in the viewport
+- Full-screen voxel topography background: an isometric grid with trigonometric height waves; voxels rise where the pointer passes (with eased follow)
+- Three ways to replay: click anywhere, click the `↻ Replay` button, or press `R`
+- With `prefers-reduced-motion: reduce`, the background draws a single static frame and the wordmark shows its finished state without animating
+- Falls back to a plain "hello" text when JavaScript is disabled
+- No frameworks, no build, no external requests; all UI copy is English
 
-## 文件说明
+## Files
 
-| 文件 | 作用 |
+| File | Purpose |
 | --- | --- |
-| `index.html` | 页面结构 |
-| `style.css` | 样式；`draw-path` / `fade-in` 两个 keyframes 即"边写边显"效果，canvas 固定分层 |
-| `assets/voxel-background.js` | 体素地形背景：由同名 React 组件逐行移植的原生 JS，全屏 fixed canvas |
-| `assets/hello-data.js` | path 几何数据与动画时序，由参考组件脚本提取生成，请勿手改 `d` 字符串 |
-| `assets/main.js` | 渲染逻辑：取每条 path 的真实长度，驱动 `stroke-dashoffset` 从全长走到 0 |
-| `favicon.svg` | favicon |
+| `index.html` | Page structure |
+| `style.css` | Styles; the `draw-path` / `fade-in` keyframes are the "draw as it reveals" effect, plus canvas layering |
+| `assets/voxel-background.js` | Voxel topography background: a line-by-line vanilla JS port of the React component, full-screen fixed canvas |
+| `assets/hello-data.js` | Path geometry and animation timing, extracted from the reference component by a script — do not hand-edit the `d` strings |
+| `assets/main.js` | Render logic: measures each path's real length and drives `stroke-dashoffset` from full length to 0 |
+| `favicon.svg` | Favicon |
 
-## 实现要点
+## Implementation notes
 
-- motion 的 `pathLength: 0 -> 1` 通过 `stroke-dasharray = pathLength`、`stroke-dashoffset` 从全长动画到 0 复刻；每条 path 的 `duration` / `delay` / `ease` 以及 opacity 的时长都按参考组件原样保留（英文共 2 条 path，全程 3.5s）。
-- 清晰度：SVG 设 `shape-rendering="geometricPrecision"`，非整数缩放下笔画边缘更干净；字标高度 `clamp(96px, 22vw, 168px)`，矢量渲染天然适配高分屏。
-- 背景移植：原 React 组件用一个受边框包裹的 aspect-video 容器，这里改为全屏 fixed canvas。**尺寸由 CSS 驱动**（`width:100%; height:100lvh`），JS 不写内联 px，只用 ResizeObserver 把 canvas 盒子尺寸镜像成位图（DPR 上限 2）——这样移动端工具栏收放、旋转时盒子随视口变化，永远不会露出底色带；用 `100lvh`（大视口高度）而非 `dvh`，iOS 上画布天然高出可视区一截、被裁掉也不露底。算法逐行对应原组件（画家算法从后往前、LUT 顶面配色、0.32 系数的指针缓动）；`body` 底色与 canvas 清屏色一致（`#020617`）作最后兜底。
-- 交互：字标是空心描边，在 SVG 上挂 click 会点不中，因此点击监听挂在 document 级（按钮处 `stopPropagation` 防止双触发）。
-- `prefers-reduced-motion` 时跳过动画直接渲染完成态；无 JS 时由 `<noscript>` 兜底显示纯文本。
+- The `pathLength: 0 -> 1` of motion is replicated with `stroke-dasharray = pathLength` and a `stroke-dashoffset` animation from the full length to 0; each path's `duration`, `delay`, `ease`, and opacity timing are kept exactly as in the reference component (2 paths for English, 3.5s total).
+- Crispness: the SVG uses `shape-rendering="geometricPrecision"` for cleaner stroke edges at non-integer scales; the wordmark height is `clamp(96px, 22vw, 168px)`, and vector rendering is naturally sharp on high-DPI screens.
+- Background port: the original component used a bordered aspect-video container; here it is a full-screen fixed canvas. **The size is CSS-driven** (`width: 100%; height: 100lvh`); JS never writes inline px and only mirrors the canvas box into the bitmap via ResizeObserver (DPR capped at 2) — so the box follows the viewport through mobile toolbar show/hide and rotation, and a background-colored strip can never show through. `100lvh` (the large viewport height) is used instead of `dvh` so the canvas naturally overscans the visible area on iOS and is simply clipped. The algorithm is a line-by-line port (back-to-front painter's algorithm, LUT top-face coloring, 0.32 pointer easing); the `body` background matches the canvas clear color (`#020617`) as a final fallback.
+- Interaction: the wordmark is a hollow stroke, so a click listener on the SVG alone would miss; the click listener is attached at the document level (with `stopPropagation` on the button to avoid double-firing).
+- With `prefers-reduced-motion` the animations are skipped and the finished state renders directly; without JS, `<noscript>` shows the plain text fallback.
 
-## 部署
+## Deployment
 
-推送到 GitHub 后，Settings → Pages → Source 选 `Deploy from a branch`，分支 `main`、目录 `/` 即可。Pages 有约 10 分钟 CDN 缓存，推送后线上更新稍有延迟属正常现象。
+After pushing to GitHub, set Settings → Pages → Source to `Deploy from a branch`, branch `main`, directory `/`. Note that Pages has a CDN cache of about 10 minutes, so a short delay before the live site updates is normal.

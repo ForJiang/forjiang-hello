@@ -1,7 +1,8 @@
 /**
- * 把 hello-data.js 里的 path 数据渲染成“边写边显”的手写字标。
- * 复刻 motion/react 的行为：pathLength 0->1 用 stroke-dashoffset 走完全长实现，
- * 每条 path 的 duration / delay / ease / opacity 时长均取自参考组件。
+ * Renders the path data from hello-data.js as a "draws as it reveals" wordmark.
+ * Replicates motion/react behavior: pathLength 0->1 is implemented by walking
+ * stroke-dashoffset from the full length to 0, with each path's duration /
+ * delay / ease / opacity timing taken from the reference component.
  */
 (function () {
   var NS = "http://www.w3.org/2000/svg";
@@ -50,7 +51,8 @@
       return;
     }
 
-    // 先测量并落定初始态（全藏），强制回流后再挂动画，避免浏览器把起始状态跳过
+    // Measure and commit the hidden initial state, force a reflow, then attach
+    // the animation so the browser cannot skip the starting state
     paths.forEach(function (el) {
       var len = el.getTotalLength();
       el.style.setProperty("--len", String(len));
@@ -63,7 +65,8 @@
       el.classList.add("drawing");
     });
 
-    // 对应参考组件的 onAnimationComplete：最后一条 path 画完时显示重播
+    // Mirrors the reference component's onAnimationComplete: reveal the dock
+    // when the last path finishes drawing
     completeTimer = window.setTimeout(finish, totalTime() * 1000 + 80);
   }
 
@@ -77,7 +80,8 @@
     render();
   });
 
-  // 点页面任意处都能重播（字标是空心描边，只监听 svg 会点不中）
+  // Clicking anywhere replays (the wordmark is a hollow stroke, so a listener
+  // on the svg alone would miss clicks between the letters)
   document.addEventListener("click", function (e) {
     if (e.target === replayBtn) return;
     render();

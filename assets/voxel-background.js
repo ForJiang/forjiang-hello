@@ -1,6 +1,8 @@
 /**
- * VoxelTopographyGrid 背景——由同名 React 组件逐行移植为原生 JS（无依赖）。
- * 等距视角体素网格：三角函数高度起伏，指针附近隆起；画家算法从后往前绘制。
+ * Voxel topography background — a line-by-line vanilla JS port of the React
+ * component of the same name (no dependencies).
+ * Isometric voxel grid: trigonometric height waves with a raised mound under
+ * the pointer; rendered back-to-front with the painter's algorithm.
  */
 (function () {
   var canvas = document.getElementById("voxel-bg");
@@ -8,7 +10,7 @@
   var ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) return;
 
-  // 原组件的 props 默认值
+  // Default props of the original component
   var tileSize = 28;
   var maxHeight = 70;
   var primaryColor = "#6366f1";
@@ -30,7 +32,7 @@
 
   var baseRgb = hexToRgb(primaryColor);
 
-  // 预计算左右侧面颜色（每帧零分配）
+  // Pre-computed side face colors (zero allocations per frame)
   var leftFaceColor =
     "rgba(" + Math.floor(baseRgb.r * 0.45) + ", " + Math.floor(baseRgb.g * 0.45) +
     ", " + Math.floor(baseRgb.b * 0.45) + ", 0.85)";
@@ -38,7 +40,7 @@
     "rgba(" + Math.floor(baseRgb.r * 0.65) + ", " + Math.floor(baseRgb.g * 0.65) +
     ", " + Math.floor(baseRgb.b * 0.65) + ", 0.85)";
 
-  // 顶面高度照明的颜色查找表
+  // Lookup table for top-face elevation lighting
   var topColorLUT = new Array(101);
   for (var i = 0; i <= 100; i++) {
     var ratio = i / 100;
@@ -52,10 +54,10 @@
   var width = 0;
   var height = 0;
   var time = 0;
-  var rafId = null;
 
-  // 位图尺寸跟随 canvas 的 CSS 盒子（由 CSS 的 100%/100lvh 驱动），
-  // 不写死内联 px——移动端工具栏收放时盒子会变，ResizeObserver 会补上
+  // The bitmap follows the canvas's CSS box (driven by CSS 100% / 100lvh);
+  // no inline px is written here — the box changes with mobile toolbar
+  // show/hide, and the ResizeObserver fills in the new bitmap
   function handleResize() {
     var rect = canvas.getBoundingClientRect();
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -64,7 +66,7 @@
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (reduceMotion) draw(); // 静态模式：尺寸变化后补画一帧
+    if (reduceMotion) draw(); // static mode: repaint one frame after a resize
   }
 
   var resizeObserver = new ResizeObserver(handleResize);
@@ -140,7 +142,7 @@
 
         var py = isoY - h;
 
-        // 屏幕空间剔除
+        // Screen-space culling
         if (
           isoX + tileW < 0 ||
           isoX - tileW > width ||
@@ -157,7 +159,7 @@
 
         var sideBottomShift = h + 15;
 
-        // 左侧面
+        // Left side face
         ctx.beginPath();
         ctx.moveTo(topP4X, py);
         ctx.lineTo(isoX, topP3Y);
@@ -167,7 +169,7 @@
         ctx.fillStyle = leftFaceColor;
         ctx.fill();
 
-        // 右侧面
+        // Right side face
         ctx.beginPath();
         ctx.moveTo(isoX, topP3Y);
         ctx.lineTo(topP2X, py);
@@ -177,7 +179,7 @@
         ctx.fillStyle = rightFaceColor;
         ctx.fill();
 
-        // 顶面
+        // Top face
         ctx.beginPath();
         ctx.moveTo(isoX, topP1Y);
         ctx.lineTo(topP2X, py);
@@ -192,7 +194,7 @@
         ctx.fillStyle = topColorLUT[lutIdx];
         ctx.fill();
 
-        // 线框叠加
+        // Wireframe overlay
         ctx.strokeStyle = wireColor;
         ctx.lineWidth = 0.6;
         ctx.stroke();
@@ -201,11 +203,11 @@
   }
 
   if (reduceMotion) {
-    draw(); // 只画一帧静态地形，不循环
+    draw(); // draw a single static frame, no loop
   } else {
     (function loop() {
       draw();
-      rafId = requestAnimationFrame(loop);
+      requestAnimationFrame(loop);
     })();
   }
 })();

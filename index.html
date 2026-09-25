@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>hello — ForJiang</title>
-    <meta name="description" content="Apple Hello 手写描边动画演示。" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Apple Hello hand-drawn stroke animation over a voxel topography grid." />
+    <meta name="theme-color" content="#020617" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- 背景：体素地形网格（原生 JS 复刻，见 assets/voxel-background.js） -->
+    <!-- Background: voxel topography grid (vanilla JS port, see assets/voxel-background.js) -->
     <canvas id="voxel-bg" aria-hidden="true"></canvas>
 
     <main class="stage">
-      <!-- hello 手写动画由 main.js 依据 hello-data.js 渲染 -->
+      <!-- The hello handwriting is rendered by main.js from hello-data.js -->
       <svg
         id="hello-svg"
         xmlns="http://www.w3.org/2000/svg"
