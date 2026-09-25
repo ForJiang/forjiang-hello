@@ -10,11 +10,11 @@
   var ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) return;
 
-  // Default props of the original component
+  // Default props of the original component (recolored to a black/gray monochrome palette)
   var tileSize = 28;
   var maxHeight = 70;
-  var primaryColor = "#6366f1";
-  var wireColor = "rgba(129, 140, 248, 0.4)";
+  var primaryColor = "#737373";
+  var wireColor = "rgba(212, 212, 212, 0.35)";
   var speed = 0.015;
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -107,7 +107,7 @@
     var mx = mouse.x;
     var my = mouse.y;
 
-    ctx.fillStyle = "#020617"; // slate-950
+    ctx.fillStyle = "#000000"; // pure black sky
     ctx.fillRect(0, 0, width, height);
 
     var gridCols = Math.ceil(width / tileW) + 4;

@@ -1,6 +1,6 @@
 # ForJiang — hello
 
-A zero-dependency static demo page: over a full-screen indigo voxel topography grid, **hello** is hand-drawn stroke by stroke in the center (3.5 seconds), and a replay entry fades in at the bottom when it finishes. Nothing else on the page — it is a demo of this one animation.
+A zero-dependency static demo page: over a full-screen black-and-gray voxel topography grid, **hello** is hand-drawn stroke by stroke in the center (3.5 seconds), and a replay entry fades in at the bottom when it finishes. Nothing else on the page — it is a demo of this one animation.
 
 Live: **https://forjiang.github.io/forjiang-hello/**
 
@@ -39,7 +39,7 @@ Opening `index.html` directly also works (no external requests).
 
 - The `pathLength: 0 -> 1` of motion is replicated with `stroke-dasharray = pathLength` and a `stroke-dashoffset` animation from the full length to 0; each path's `duration`, `delay`, `ease`, and opacity timing are kept exactly as in the reference component (2 paths for English, 3.5s total).
 - Crispness: the SVG uses `shape-rendering="geometricPrecision"` for cleaner stroke edges at non-integer scales; the wordmark height is `clamp(96px, 22vw, 168px)`, and vector rendering is naturally sharp on high-DPI screens.
-- Background port: the original component used a bordered aspect-video container; here it is a full-screen fixed canvas. **The size is CSS-driven** (`width: 100%; height: 100lvh`); JS never writes inline px and only mirrors the canvas box into the bitmap via ResizeObserver (DPR capped at 2) — so the box follows the viewport through mobile toolbar show/hide and rotation, and a background-colored strip can never show through. `100lvh` (the large viewport height) is used instead of `dvh` so the canvas naturally overscans the visible area on iOS and is simply clipped. The algorithm is a line-by-line port (back-to-front painter's algorithm, LUT top-face coloring, 0.32 pointer easing); the `body` background matches the canvas clear color (`#020617`) as a final fallback.
+- Background port: the original component used a bordered aspect-video container; here it is a full-screen fixed canvas. **The size is belt-and-braces CSS-driven**: `height: 100%` stretches the fixed box to whatever the browser treats as the viewport, and `min-height: 100lvh` adds the large-viewport floor, so no pane shape, scale, or iOS toolbar state can leave an uncovered strip. JS never writes inline px and only mirrors the canvas box into the bitmap via ResizeObserver (DPR capped at 2). The algorithm is a line-by-line port (back-to-front painter's algorithm, LUT top-face coloring, 0.32 pointer easing) with the palette recolored from indigo to a black/gray monochrome (`#000000` sky, `#737373` voxels, light-gray wireframe); the `body` background matches the canvas clear color (`#000000`) as a final fallback.
 - Interaction: the wordmark is a hollow stroke, so a click listener on the SVG alone would miss; the click listener is attached at the document level (with `stopPropagation` on the button to avoid double-firing).
 - With `prefers-reduced-motion` the animations are skipped and the finished state renders directly; without JS, `<noscript>` shows the plain text fallback.
 

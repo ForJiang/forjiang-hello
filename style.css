@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  --bg: #020617;
+  --bg: #000000;
   --ink: #f5f5f7;
   --ink-dim: rgba(245, 245, 247, 0.62);
   --accent: #facc15;
@@ -31,16 +31,18 @@ body {
 
 /* ---------- Background: voxel topography grid ---------- */
 
-/* CSS drives the size: 100lvh is the large viewport height (toolbars collapsed),
-   so on iOS the canvas naturally overscans the visible area and is simply clipped
-   instead of leaving a gap; JS only mirrors the box into the bitmap
-   (see voxel-background.js) */
+/* Belt-and-braces sizing: height:100% stretches the fixed box to whatever the
+   browser considers the viewport (covers odd pane/scale setups where 100lvh
+   alone measures short), and min-height:100lvh adds the large-viewport floor
+   so iOS toolbar collapse can never leave a gap. JS only mirrors the box into
+   the bitmap (see voxel-background.js) */
 #voxel-bg {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100lvh;
+  height: 100%;
+  min-height: 100lvh;
   z-index: 0;
   display: block;
 }
