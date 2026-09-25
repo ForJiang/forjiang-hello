@@ -9,6 +9,10 @@
   var svg = document.getElementById("hello-svg");
   var dock = document.getElementById("dock");
   var replayBtn = document.getElementById("replay");
+  var clockTime = document.getElementById("clock-time");
+  var clockDate = document.getElementById("clock-date");
+
+  var DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var completeTimer = null;
@@ -126,6 +130,23 @@
   window.addEventListener("resize", function () {
     publishLight(lightIntensity);
   });
+
+  // Live clock: re-arms itself on each second boundary so it never drifts
+  function pad(n) {
+    return (n < 10 ? "0" : "") + n;
+  }
+
+  function renderClock() {
+    var now = new Date();
+    clockTime.textContent =
+      pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+    clockDate.textContent =
+      DAYS[now.getDay()] + " · " + now.getFullYear() + "-" +
+      pad(now.getMonth() + 1) + "-" + pad(now.getDate());
+    window.setTimeout(renderClock, 1000 - now.getMilliseconds());
+  }
+
+  renderClock();
 
   render();
 })();

@@ -10,11 +10,11 @@
   var ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) return;
 
-  // Default props of the original component (recolored to a black/gray monochrome palette)
+  // Default props of the original component (recolored to a darker black/gray monochrome palette)
   var tileSize = 28;
   var maxHeight = 70;
-  var primaryColor = "#737373";
-  var wireColor = "rgba(212, 212, 212, 0.35)";
+  var primaryColor = "#4f4f4f";
+  var wireColor = "rgba(190, 190, 190, 0.28)";
   var speed = 0.015;
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
