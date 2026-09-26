@@ -96,9 +96,12 @@
     return Math.max(1, dpr);
   }
 
-  // The bitmap follows the canvas's CSS box (driven by CSS 100% / 100lvh);
-  // no inline px is written here — the box changes with mobile toolbar
-  // show/hide, and the ResizeObserver fills in the new bitmap
+  // Sizes the canvas from window.inner* (the authoritative visible size) and
+  // mirrors it into the bitmap at an adaptive device pixel ratio. Runs on
+  // resize/orientationchange, on ResizeObserver callbacks, and from the
+  // per-frame guard in draw() — whichever fires first, the result is the same
+  // box. Early-returns when nothing changed so a ResizeObserver callback
+  // caused by our own inline px write cannot loop.
   function handleResize() {
     // window.inner* is the authoritative visible size: it follows the mobile
     // toolbar show/hide on every browser generation, while a fixed element's
