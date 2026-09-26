@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- 背景：体素地形网格（原生 JS 复刻，见 assets/voxel-background.js） -->
+    <canvas id="voxel-bg" aria-hidden="true"></canvas>
+
     <main class="stage">
       <!-- hello 手写动画由 main.js 依据 hello-data.js 渲染 -->
       <svg
@@ -38,6 +41,7 @@
       <p class="noscript-fallback">hello</p>
     </noscript>
 
+    <script src="assets/voxel-background.js" defer></script>
     <script src="assets/hello-data.js"></script>
     <script src="assets/main.js" defer></script>
   </body>
