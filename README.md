@@ -1,6 +1,6 @@
 # ForJiang — hello
 
-A zero-dependency static demo page: over a full-screen black-and-gray voxel topography grid, **hello** is hand-drawn stroke by stroke in the center (3.5 seconds), and a replay entry fades in at the bottom when it finishes. Nothing else on the page — it is a demo of this one animation.
+A zero-dependency static demo page: over a full-screen black-and-gray voxel topography grid, **hello** is hand-drawn stroke by stroke in the center (3.5 seconds); click anywhere or press `R` to draw it again. Nothing else on the page — it is a demo of this one animation.
 
 Live: **https://forjiang.github.io/forjiang-hello/**
 
