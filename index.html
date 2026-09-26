@@ -35,11 +35,20 @@
       <span class="clock-date" id="clock-date"></span>
     </div>
 
-    <p class="credit" id="credit">© 2026 ForJiang</p>
+    <!-- Hovering the signature reveals the fullscreen control; its fill
+         animation ports the OriginButton reference (pointer-origin circle) -->
+    <div class="bottom" id="bottom">
+      <button class="fs-btn" id="fs-btn" type="button">
+        <span class="fs-fill" id="fs-fill" aria-hidden="true"></span>
+        <span class="fs-label" id="fs-label">Fullscreen</span>
+      </button>
+      <p class="credit" id="credit">© 2026 ForJiang</p>
+    </div>
 
     <noscript>
       <style>
         .clock { display: none; }
+        .bottom { opacity: 1; pointer-events: none; }
         .credit { opacity: 0.75; }
       </style>
       <p class="noscript-fallback">hello</p>

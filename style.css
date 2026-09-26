@@ -144,24 +144,118 @@ body.done .clock {
   letter-spacing: 0.14em;
 }
 
-/* ---------- Signature ---------- */
+/* ---------- Bottom zone: signature + fullscreen control ---------- */
 
-.credit {
+/* Wide invisible hover pad around the signature so the control is easy to
+   reach; only interactive once the drawing has finished */
+.bottom {
   position: fixed;
   z-index: 1;
   left: 0;
   right: 0;
-  bottom: max(18px, env(safe-area-inset-bottom));
-  text-align: center;
-  color: var(--ink-dim);
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px 10px;
   opacity: 0;
   transition: opacity 0.7s ease;
 }
 
-body.done .credit {
+body.done .bottom {
+  opacity: 1;
+}
+
+body:not(.done) .bottom {
+  pointer-events: none;
+}
+
+.credit {
+  color: var(--ink-dim);
+  font-size: 12px;
+  letter-spacing: 0.08em;
   opacity: 0.75;
+  transition: opacity 0.25s ease;
+}
+
+.bottom:hover .credit,
+.bottom:focus-within .credit {
+  opacity: 1;
+}
+
+/* Fullscreen control — hover to reveal; the fill animation ports the
+   OriginButton reference: a circle grows from the pointer position to a
+   diameter of 2x the farthest corner distance, inverting the label */
+.fs-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 26px;
+  overflow: hidden;
+  border: 0.5px solid rgba(245, 245, 247, 0.22);
+  border-radius: 12px;
+  background: rgba(10, 10, 12, 0.55);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s ease;
+}
+
+.bottom:hover .fs-btn,
+.bottom:focus-within .fs-btn {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.fs-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.fs-fill {
+  position: absolute;
+  left: var(--ox, 50%);
+  top: var(--oy, 50%);
+  width: var(--size, 0);
+  height: var(--size, 0);
+  border-radius: 999px;
+  background: var(--ink);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.fs-btn.is-filling {
+  color: #000;
+  border-color: var(--ink);
+}
+
+.fs-btn.is-filling .fs-fill {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* .bottom prefix keeps this at the same specificity as the hover reveal rule */
+.bottom .fs-btn:active {
+  transform: scale(0.985);
+}
+
+.fs-label {
+  position: relative;
+  z-index: 1;
 }
 
 .noscript-fallback {

@@ -9,6 +9,8 @@
   var svg = document.getElementById("hello-svg");
   var clockTime = document.getElementById("clock-time");
   var clockDate = document.getElementById("clock-date");
+  var fsBtn = document.getElementById("fs-btn");
+  var fsLabel = document.getElementById("fs-label");
 
   var DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -105,8 +107,10 @@
   }
 
   // Clicking anywhere replays (the wordmark is a hollow stroke, so a listener
-  // on the svg alone would miss clicks between the letters)
+  // on the svg alone would miss clicks between the letters) — except on the
+  // bottom zone, which owns its clicks (the fullscreen control)
   document.addEventListener("click", function (e) {
+    if (e.target.closest && e.target.closest("#bottom")) return;
     render();
   });
 
@@ -115,6 +119,78 @@
       render();
     }
   });
+
+  // ---------- Fullscreen control (OriginButton-style fill) ----------
+
+  // Diameter that guarantees the circle covers the button from any origin:
+  // twice the farthest corner distance (ported from the reference component)
+  function coverDiameter(width, height, x, y) {
+    return Math.ceil(
+      2 *
+        Math.max(
+          Math.hypot(x, y),
+          Math.hypot(width - x, y),
+          Math.hypot(x, height - y),
+          Math.hypot(width - x, height - y)
+        )
+    );
+  }
+
+  function setFillOrigin(x, y) {
+    var rect = fsBtn.getBoundingClientRect();
+    var size = coverDiameter(rect.width, rect.height, x, y);
+    fsBtn.style.setProperty("--ox", x + "px");
+    fsBtn.style.setProperty("--oy", y + "px");
+    fsBtn.style.setProperty("--size", size + "px");
+  }
+
+  function setFillOriginFromPointer(e) {
+    var rect = fsBtn.getBoundingClientRect();
+    setFillOrigin(e.clientX - rect.left, e.clientY - rect.top);
+  }
+
+  function setFillOriginFromCenter() {
+    var rect = fsBtn.getBoundingClientRect();
+    setFillOrigin(rect.width / 2, rect.height / 2);
+  }
+
+  if (fsBtn) {
+    fsBtn.addEventListener("pointerenter", function (e) {
+      setFillOriginFromPointer(e);
+      fsBtn.classList.add("is-filling");
+    });
+    fsBtn.addEventListener("pointerdown", function (e) {
+      if (e.button !== 0) return;
+      setFillOriginFromPointer(e);
+      fsBtn.classList.add("is-filling");
+    });
+    fsBtn.addEventListener("pointerleave", function () {
+      fsBtn.classList.remove("is-filling");
+    });
+    fsBtn.addEventListener("focus", function () {
+      if (fsBtn.matches(":focus-visible")) {
+        setFillOriginFromCenter();
+        fsBtn.classList.add("is-filling");
+      }
+    });
+    fsBtn.addEventListener("blur", function () {
+      fsBtn.classList.remove("is-filling");
+    });
+    fsBtn.addEventListener("click", function (e) {
+      e.stopPropagation(); // never replay on a control click
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        // Rejects in embedded views without the fullscreen permission —
+        // swallow it so the demo keeps working either way
+        var p = document.documentElement.requestFullscreen();
+        if (p && p.catch) p.catch(function () {});
+      }
+    });
+    document.addEventListener("fullscreenchange", function () {
+      fsLabel.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Fullscreen";
+    });
+  }
 
   // The wordmark size depends on vw units — re-publish the light on resize
   window.addEventListener("resize", function () {

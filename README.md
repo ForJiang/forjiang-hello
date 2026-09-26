@@ -23,6 +23,7 @@ Opening `index.html` directly also works (no external requests).
 - Full-screen voxel topography background: an isometric grid with trigonometric height waves; voxels rise where the pointer passes (with eased follow)
 - **The wordmark is a real-time light source**: its glow lands on the terrain two ways — a per-voxel elliptical falloff (smoothstep, 24-step LUT) brightening the top and right faces, plus a per-pixel additive white gradient pool over the whole scene that is free of voxel quantization and breathes slowly. The light ramps up as the strokes draw themselves and intensifies up to 2x while the pointer lingers over the wordmark — the background visibly reacts to the foreground
 - Replay by clicking anywhere or pressing `R`
+- Hovering the signature at the bottom reveals a **Fullscreen** control; its fill animation ports the OriginButton reference — a circle grows from the pointer position to twice the farthest corner distance, inverting the label, with a slight press-down scale
 - With `prefers-reduced-motion: reduce`, the background draws a single static frame and the wordmark shows its finished state without animating
 - Falls back to a plain "hello" text when JavaScript is disabled
 - No frameworks, no build, no external requests; all UI copy is English
