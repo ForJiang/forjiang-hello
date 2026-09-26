@@ -82,6 +82,17 @@
   var height = 0;
   var time = 0;
   var lastDpr = 0;
+  var waveTables = null;
+
+  // Effective device pixel ratio: allow up to 3x so dpr-3 phones render the
+  // terrain natively instead of being upscaled from 2x, bounded by a total
+  // pixel budget so very large viewports do not pay 3x fill cost
+  function effectiveDpr(w, h) {
+    var dpr = Math.min(window.devicePixelRatio || 1, 3);
+    var budgeted = Math.sqrt(4500000 / (w * h));
+    if (budgeted < dpr) dpr = budgeted;
+    return Math.max(1, dpr);
+  }
 
   // The bitmap follows the canvas's CSS box (driven by CSS 100% / 100lvh);
   // no inline px is written here — the box changes with mobile toolbar
@@ -91,10 +102,16 @@
     // Skip degenerate measurements (tab activation transitions can report
     // ~0px boxes) so a transient never shrinks the bitmap for good
     if (rect.width < 8 || rect.height < 8) return;
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Round FIRST, then derive the dpr from the rounded dimensions — the
+    // per-frame guard calls effectiveDpr(width, height) with these same
+    // rounded values, so a fractional viewport can never make the two
+    // disagree and trigger a resize every frame
+    var w = Math.max(1, Math.round(rect.width));
+    var h = Math.max(1, Math.round(rect.height));
+    var dpr = effectiveDpr(w, h);
     lastDpr = dpr;
-    width = Math.max(1, Math.round(rect.width));
-    height = Math.max(1, Math.round(rect.height));
+    width = w;
+    height = h;
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -131,10 +148,15 @@
   var invMaxHeight = 1 / (maxHeight + 55);
 
   function draw() {
-    // DPR changes (moving between displays, browser zoom) do not fire
-    // ResizeObserver — check every frame so the bitmap never goes stale
-    var dprNow = Math.min(window.devicePixelRatio || 1, 2);
-    if (dprNow !== lastDpr) {
+    // Per-frame guards for the cases ResizeObserver misses: DPR changes
+    // (display/zoom) and box changes during tab activation transitions.
+    // The rect read is a clean layout read — this frame writes no DOM styles.
+    var rectNow = canvas.getBoundingClientRect();
+    if (
+      Math.round(rectNow.width) !== width ||
+      Math.round(rectNow.height) !== height ||
+      effectiveDpr(width, height) !== lastDpr
+    ) {
       handleResize();
     }
 
@@ -188,8 +210,59 @@
     var startC = -half;
     var endC = half + 1;
 
+    var cols = endC - startC;
+    var rows = endR - startR;
+
+    // Wave phase tables via angle addition. The height field is
+    //   wave1 = sin(t2 + c*.25 + r*.25)
+    //   wave2 = cos(t15 + c*.15 - r*.30)
+    // Splitting each into per-index trig tables (rebuilt only when the grid
+    // size changes) replaces two trig calls per voxel with a few multiplies;
+    // sin(a+b) expansions are exact identities, so the picture is unchanged.
+    if (!waveTables || waveTables.cols !== cols || waveTables.rows !== rows) {
+      waveTables = {
+        cols: cols,
+        rows: rows,
+        sinA: new Float64Array(cols), // sin(t2 + c*.25)
+        cosA: new Float64Array(cols), // cos(t2 + c*.25)
+        sinG: new Float64Array(cols), // sin(t15 + c*.15)
+        cosG: new Float64Array(cols), // cos(t15 + c*.15)
+        sinB: new Float64Array(rows), // sin(r*.25)
+        cosB: new Float64Array(rows), // cos(r*.25)
+        sinD: new Float64Array(rows), // sin(-r*.30)
+        cosD: new Float64Array(rows), // cos(-r*.30)
+      };
+    }
+    var t2 = time * 2;
+    var t15 = time * 1.5;
+    for (var ci = 0; ci < cols; ci++) {
+      var cIndex = startC + ci;
+      var a = t2 + cIndex * 0.25;
+      var g = t15 + cIndex * 0.15;
+      waveTables.sinA[ci] = Math.sin(a);
+      waveTables.cosA[ci] = Math.cos(a);
+      waveTables.sinG[ci] = Math.sin(g);
+      waveTables.cosG[ci] = Math.cos(g);
+    }
+    for (var ri = 0; ri < rows; ri++) {
+      var rIndex = startR + ri;
+      var b = rIndex * 0.25;
+      var d = rIndex * 0.3;
+      waveTables.sinB[ri] = Math.sin(b);
+      waveTables.cosB[ri] = Math.cos(b);
+      waveTables.sinD[ri] = -Math.sin(d);
+      waveTables.cosD[ri] = Math.cos(d);
+    }
+
     for (var r = startR; r < endR; r++) {
+      var rIdx = r - startR;
+      var sinBr = waveTables.sinB[rIdx];
+      var cosBr = waveTables.cosB[rIdx];
+      var sinDr = waveTables.sinD[rIdx];
+      var cosDr = waveTables.cosD[rIdx];
+
       for (var c = startC; c < endC; c++) {
+        var cIdx = c - startC;
         var isoX = originX + (c - r) * tileW;
         var isoY = originY + (c + r) * tileH;
 
@@ -197,8 +270,9 @@
         var dy = isoY - my;
         var distSq = dx * dx + dy * dy;
 
-        var wave1 = Math.sin(time * 2 + c * 0.25 + r * 0.25);
-        var wave2 = Math.cos(time * 1.5 + c * 0.15 - r * 0.3);
+        // sin(a+b) / cos(a+b) from the per-index tables
+        var wave1 = waveTables.sinA[cIdx] * cosBr + waveTables.cosA[cIdx] * sinBr;
+        var wave2 = waveTables.cosG[cIdx] * cosDr - waveTables.sinG[cIdx] * sinDr;
         var h = (wave1 + wave2 + 2) * 0.25 * maxHeight;
 
         if (distSq < maxRadiusSq) {
