@@ -1,0 +1,224 @@
+:root {
+  color-scheme: dark;
+  --bg: #000000;
+  --ink: #f5f5f7;
+  --ink-dim: rgba(245, 245, 247, 0.62);
+  --accent: #facc15;
+  --line: rgba(245, 245, 247, 0.22);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* 字标背后一圈极淡的光晕，避免纯黑显得平 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 62% 42% at 50% 42%,
+    rgba(255, 255, 255, 0.07),
+    transparent 70%
+  );
+}
+
+.stage {
+  position: relative;
+  min-height: 100lvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(28px, 6vh, 56px);
+  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+/* ---------- 手写字标 ---------- */
+
+#hello-svg {
+  height: clamp(72px, 17vw, 124px);
+  width: auto;
+  max-width: min(92vw, 940px);
+  overflow: visible;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.12));
+}
+
+#hello-svg path {
+  stroke-dashoffset: var(--len, 0);
+}
+
+/* motion 的 pathLength: 0 -> 1 由 dashoffset 从全长走到 0 复刻 */
+#hello-svg path.drawing {
+  animation:
+    draw-path var(--dur) var(--ease) var(--delay) both,
+    fade-in var(--op-dur) linear var(--op-delay) both;
+}
+
+@keyframes draw-path {
+  from {
+    stroke-dashoffset: var(--len);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- 写完后的内容 ---------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 2.6vh, 22px);
+}
+
+body.done .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+.name {
+  font-size: clamp(34px, 6vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.greeting {
+  color: var(--ink-dim);
+  font-size: clamp(14px, 2.4vw, 17px);
+  line-height: 1.75;
+}
+
+.greeting-en {
+  font-size: 0.92em;
+  opacity: 0.82;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.55em 1.4em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: clamp(13px, 2vw, 15px);
+  text-decoration: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.pill:hover {
+  background: var(--ink);
+  color: #000;
+  border-color: var(--ink);
+}
+
+.pill:focus-visible,
+.lang-opt:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.links,
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.lang-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.lang-opt {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-dim);
+  font-family: inherit;
+  font-size: clamp(12px, 1.9vw, 14px);
+  padding: 0.55em 1.1em;
+  cursor: pointer;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.lang-opt + .lang-opt {
+  border-left: 1px solid var(--line);
+}
+
+.lang-opt.is-active {
+  background: var(--ink);
+  color: #000;
+}
+
+.footer {
+  position: absolute;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  color: var(--ink-dim);
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.noscript-fallback {
+  font-size: clamp(24px, 5vw, 40px);
+  font-weight: 700;
+}
+
+/* 减少动态效果：直接展示完成态 */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: none;
+  }
+  #hello-svg path.drawing {
+    animation: none;
+  }
+}
