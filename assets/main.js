@@ -12,11 +12,28 @@
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var completeTimer = null;
+  var lightTimer = null;
+  var lightIntensity = 0;
 
   function totalTime() {
     return HELLO_DATA.en.paths.reduce(function (max, p) {
       return Math.max(max, p.delay + p.dur);
     }, 0);
+  }
+
+  // Publish the wordmark as a light source for the voxel background: position,
+  // elliptical reach, and current intensity (viewport CSS pixels, same space
+  // the canvas draws in)
+  function publishLight(intensity) {
+    lightIntensity = intensity;
+    var rect = svg.getBoundingClientRect();
+    window.__helloLight = {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+      rx: Math.max(60, rect.width * 0.72),
+      ry: Math.max(50, rect.height * 1.45),
+      intensity: intensity,
+    };
   }
 
   function render() {
@@ -47,6 +64,7 @@
         el.style.strokeDashoffset = "0";
         el.style.opacity = "1";
       });
+      publishLight(1);
       finish();
       return;
     }
@@ -68,6 +86,17 @@
     // Mirrors the reference component's onAnimationComplete: reveal the dock
     // when the last path finishes drawing
     completeTimer = window.setTimeout(finish, totalTime() * 1000 + 80);
+
+    // The wordmark's glow ramps up as it writes itself
+    window.clearInterval(lightTimer);
+    var lightTotal = totalTime() * 1000;
+    var lightStart = performance.now();
+    publishLight(0.18);
+    lightTimer = window.setInterval(function () {
+      var p = Math.min(1, (performance.now() - lightStart) / lightTotal);
+      publishLight(0.18 + 0.82 * p);
+      if (p >= 1) window.clearInterval(lightTimer);
+    }, 80);
   }
 
   function finish() {
@@ -91,6 +120,11 @@
     if (e.key === "r" || e.key === "R") {
       render();
     }
+  });
+
+  // The wordmark size depends on vw units — re-publish the light on resize
+  window.addEventListener("resize", function () {
+    publishLight(lightIntensity);
   });
 
   render();

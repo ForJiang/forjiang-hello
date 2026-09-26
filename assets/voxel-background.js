@@ -50,6 +50,28 @@
     topColorLUT[i] = "rgb(" + r + "," + g + "," + b + ")";
   }
 
+  // Lit top-face palette for the wordmark light: 10 intensity steps x 101
+  // heights, each blended toward white. Pre-computed — zero allocations/frame.
+  var litTopLUT = new Array(10);
+  var litRightLUT = new Array(10);
+  for (var s = 0; s < 10; s++) {
+    var k = (s / 9) * 0.75; // blend factor toward white
+    var col = new Array(101);
+    for (var j = 0; j <= 100; j++) {
+      var rr = Math.floor((baseRgb.r * (0.55 + (j / 100) * 0.45)) * (1 - k) + 255 * k);
+      var gg = Math.floor((baseRgb.g * (0.55 + (j / 100) * 0.45)) * (1 - k) + 255 * k);
+      var bb = Math.floor((baseRgb.b * (0.55 + (j / 100) * 0.45)) * (1 - k) + 255 * k);
+      col[j] = "rgb(" + rr + "," + gg + "," + bb + ")";
+    }
+    litTopLUT[s] = col;
+    // The right side face catches the light too, at 60% strength — adds depth
+    var kr = k * 0.6;
+    litRightLUT[s] =
+      "rgba(" + Math.floor(baseRgb.r * 0.65 * (1 - kr) + 255 * kr) + ", " +
+      Math.floor(baseRgb.g * 0.65 * (1 - kr) + 255 * kr) + ", " +
+      Math.floor(baseRgb.b * 0.65 * (1 - kr) + 255 * kr) + ", 0.85)";
+  }
+
   var mouse = { x: -1000, y: -1000, targetX: -1000, targetY: -1000 };
   var width = 0;
   var height = 0;
@@ -61,6 +83,9 @@
   // show/hide, and the ResizeObserver fills in the new bitmap
   function handleResize() {
     var rect = canvas.getBoundingClientRect();
+    // Skip degenerate measurements (tab activation transitions can report
+    // ~0px boxes) so a transient never shrinks the bitmap for good
+    if (rect.width < 8 || rect.height < 8) return;
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     lastDpr = dpr;
     width = Math.max(1, Math.round(rect.width));
@@ -115,6 +140,27 @@
 
     var mx = mouse.x;
     var my = mouse.y;
+
+    // The hello wordmark doubles as a light source (published by main.js): the
+    // terrain beneath it is lit in real time, and the glow intensifies while
+    // the pointer lingers inside the wordmark's ellipse.
+    var light = window.__helloLight;
+    var lightOn = !!light && light.intensity > 0.02;
+    var lx = 0, ly = 0, lrx = 1, lry = 1, lint = 0;
+    if (lightOn) {
+      lx = light.x;
+      ly = light.y;
+      lrx = light.rx;
+      lry = light.ry;
+      lint = light.intensity;
+      var pdx = (mx - lx) / lrx;
+      var pdy = (my - ly) / lry;
+      var pd = pdx * pdx + pdy * pdy;
+      if (pd < 1.6) {
+        // up to 2x brighter while the pointer lingers over the wordmark
+        lint *= 1 + (1 - Math.sqrt(pd) / 1.265);
+      }
+    }
 
     ctx.fillStyle = "#000000"; // pure black sky
     ctx.fillRect(0, 0, width, height);
@@ -192,8 +238,27 @@
         ctx.lineTo(topP2X, py + sideBottomShift);
         ctx.lineTo(isoX, topP3Y + sideBottomShift);
         ctx.closePath();
-        ctx.fillStyle = rightFaceColor;
+        ctx.fillStyle = litStep ? litRightLUT[litStep] : rightFaceColor;
         ctx.fill();
+
+        // Wordmark light: elliptical falloff, quantized to a LUT step
+        var litStep = 0;
+        if (lightOn) {
+          var ldx = isoX - lx;
+          if (ldx > -lrx && ldx < lrx) {
+            var ldy = isoY - ly;
+            if (ldy > -lry && ldy < lry) {
+              var ndx = ldx / lrx;
+              var ndy = ldy / lry;
+              var d2 = ndx * ndx + ndy * ndy;
+              if (d2 < 1) {
+                var infl = 1 - Math.sqrt(d2);
+                // clamp to 1..9: litTopLUT has exactly 10 steps
+                litStep = 1 + Math.min(8, (infl * infl * lint * 8) | 0);
+              }
+            }
+          }
+        }
 
         // Top face
         ctx.beginPath();
@@ -207,7 +272,7 @@
         var lightRatio = rawLight > 1 ? 1 : rawLight < 0.1 ? 0.1 : rawLight;
         var lutIdx = (lightRatio * 100) | 0;
 
-        ctx.fillStyle = topColorLUT[lutIdx];
+        ctx.fillStyle = litStep ? litTopLUT[litStep][lutIdx] : topColorLUT[lutIdx];
         ctx.fill();
 
         // Wireframe overlay

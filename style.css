@@ -61,12 +61,17 @@ body {
 
 /* ---------- Hand-drawn wordmark ---------- */
 
+/* Fluorescent bloom: stacked white halos. The terrain light pool underneath
+   (see voxel-background.js) is the wordmark's reflection on the background */
 #hello-svg {
   height: clamp(96px, 22vw, 168px);
   width: auto;
   max-width: 92vw;
   overflow: visible;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.12));
+  filter:
+    drop-shadow(0 0 4px rgba(255, 255, 255, 0.85))
+    drop-shadow(0 0 14px rgba(255, 255, 255, 0.5))
+    drop-shadow(0 0 38px rgba(255, 255, 255, 0.32));
 }
 
 #hello-svg path {
