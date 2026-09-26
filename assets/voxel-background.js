@@ -54,20 +54,24 @@
   var time = 0;
   var rafId = null;
 
+  // 位图尺寸跟随 canvas 的 CSS 盒子（由 CSS 的 100%/100lvh 驱动），
+  // 不写死内联 px——移动端工具栏收放时盒子会变，ResizeObserver 会补上
   function handleResize() {
+    var rect = canvas.getBoundingClientRect();
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    width = document.documentElement.clientWidth;
-    height = document.documentElement.clientHeight;
+    width = Math.max(1, Math.round(rect.width));
+    height = Math.max(1, Math.round(rect.height));
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (reduceMotion) draw(); // 静态模式：尺寸变化后补画一帧
   }
 
   var resizeObserver = new ResizeObserver(handleResize);
-  resizeObserver.observe(document.documentElement);
+  resizeObserver.observe(canvas);
   handleResize();
+  window.addEventListener("resize", handleResize);
+  window.addEventListener("orientationchange", handleResize);
 
   function updatePointerPos(clientX, clientY) {
     var rect = canvas.getBoundingClientRect();

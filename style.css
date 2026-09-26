@@ -31,9 +31,14 @@ body {
 
 /* ---------- 背景：体素地形网格 ---------- */
 
+/* CSS 驱动尺寸：100lvh 取工具栏收起后的大视口高度，iOS 上画布天然高出可视区一截、
+   被裁掉也不露底；JS 只负责把盒子尺寸镜像成位图（见 voxel-background.js） */
 #voxel-bg {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100lvh;
   z-index: 0;
   display: block;
 }

@@ -39,7 +39,7 @@ python3 -m http.server 8000
 
 - motion 的 `pathLength: 0 -> 1` 通过 `stroke-dasharray = pathLength`、`stroke-dashoffset` 从全长动画到 0 复刻；每条 path 的 `duration` / `delay` / `ease` 以及 opacity 的时长都按参考组件原样保留（英文共 2 条 path，全程 3.5s）。
 - 清晰度：SVG 设 `shape-rendering="geometricPrecision"`，非整数缩放下笔画边缘更干净；字标高度 `clamp(96px, 22vw, 168px)`，矢量渲染天然适配高分屏。
-- 背景移植：原 React 组件用一个受边框包裹的 aspect-video 容器，这里改为 `position: fixed; inset: 0` 的全屏 canvas（`document.documentElement.clientWidth/Height` 测量 + ResizeObserver + DPR 上限 2），算法逐行对应原组件（画家算法从后往前、LUT 顶面配色、0.32 系数的指针缓动）；`body` 底色与 canvas 清屏色一致（`#020617`），iOS 地址栏收放造成的边缘缝隙不可见。
+- 背景移植：原 React 组件用一个受边框包裹的 aspect-video 容器，这里改为全屏 fixed canvas。**尺寸由 CSS 驱动**（`width:100%; height:100lvh`），JS 不写内联 px，只用 ResizeObserver 把 canvas 盒子尺寸镜像成位图（DPR 上限 2）——这样移动端工具栏收放、旋转时盒子随视口变化，永远不会露出底色带；用 `100lvh`（大视口高度）而非 `dvh`，iOS 上画布天然高出可视区一截、被裁掉也不露底。算法逐行对应原组件（画家算法从后往前、LUT 顶面配色、0.32 系数的指针缓动）；`body` 底色与 canvas 清屏色一致（`#020617`）作最后兜底。
 - 交互：字标是空心描边，在 SVG 上挂 click 会点不中，因此点击监听挂在 document 级（按钮处 `stopPropagation` 防止双触发）。
 - `prefers-reduced-motion` 时跳过动画直接渲染完成态；无 JS 时由 `<noscript>` 兜底显示纯文本。
 
