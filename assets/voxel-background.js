@@ -82,6 +82,8 @@
   var height = 0;
   var time = 0;
   var lastDpr = 0;
+  var lastW = 0;
+  var lastH = 0;
   var waveTables = null;
 
   // Effective device pixel ratio: allow up to 3x so dpr-3 phones render the
@@ -98,22 +100,25 @@
   // no inline px is written here — the box changes with mobile toolbar
   // show/hide, and the ResizeObserver fills in the new bitmap
   function handleResize() {
-    var rect = canvas.getBoundingClientRect();
-    // Skip degenerate measurements (tab activation transitions can report
-    // ~0px boxes) so a transient never shrinks the bitmap for good
-    if (rect.width < 8 || rect.height < 8) return;
-    // Round FIRST, then derive the dpr from the rounded dimensions — the
-    // per-frame guard calls effectiveDpr(width, height) with these same
-    // rounded values, so a fractional viewport can never make the two
-    // disagree and trigger a resize every frame
-    var w = Math.max(1, Math.round(rect.width));
-    var h = Math.max(1, Math.round(rect.height));
+    // window.inner* is the authoritative visible size: it follows the mobile
+    // toolbar show/hide on every browser generation, while a fixed element's
+    // CSS 100% stays pinned to the layout viewport on older iOS and leaves a
+    // gap when the toolbar collapses. Writing inline px is safe here because
+    // the per-frame guard in draw() re-reads window.inner* every frame, so
+    // this size can never go stale.
+    var w = Math.max(1, window.innerWidth);
+    var h = Math.max(1, window.innerHeight);
     var dpr = effectiveDpr(w, h);
+    if (w === lastW && h === lastH && dpr === lastDpr) return; // nothing changed
+    lastW = w;
+    lastH = h;
     lastDpr = dpr;
     width = w;
     height = h;
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (reduceMotion) draw(); // static mode: repaint one frame after a resize
   }
@@ -148,13 +153,11 @@
   var invMaxHeight = 1 / (maxHeight + 55);
 
   function draw() {
-    // Per-frame guards for the cases ResizeObserver misses: DPR changes
-    // (display/zoom) and box changes during tab activation transitions.
-    // The rect read is a clean layout read — this frame writes no DOM styles.
-    var rectNow = canvas.getBoundingClientRect();
+    // Per-frame guard: window.inner* changes (mobile toolbar, display zoom,
+    // window resize, tab activation transitions) are picked up within a frame
     if (
-      Math.round(rectNow.width) !== width ||
-      Math.round(rectNow.height) !== height ||
+      window.innerWidth !== lastW ||
+      window.innerHeight !== lastH ||
       effectiveDpr(width, height) !== lastDpr
     ) {
       handleResize();

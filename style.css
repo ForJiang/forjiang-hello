@@ -29,28 +29,31 @@ body {
 
 /* ---------- Background: voxel topography grid ---------- */
 
-/* Belt-and-braces sizing: height:100% stretches the fixed box to whatever the
-   browser considers the viewport (covers odd pane/scale setups where 100lvh
-   alone measures short), and min-height:100lvh adds the large-viewport floor
-   so iOS toolbar collapse can never leave a gap. JS only mirrors the box into
-   the bitmap (see voxel-background.js) */
+/* The visible size comes from JS (window.innerWidth/innerHeight, the only
+   source that follows the mobile toolbar on every browser generation);
+   the CSS 100% below is just the pre-JS fallback. width/height are then
+   mirrored to the bitmap per frame — see voxel-background.js */
 #voxel-bg {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  min-height: 100lvh;
   z-index: 0;
   display: block;
 }
 
 /* ---------- Stage: hello perfectly centered ---------- */
 
+/* Fixed like the canvas so the wordmark is always centered in exactly the
+   area the canvas covers — no document scroll, no toolbar-induced gaps */
 .stage {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 1;
-  min-height: 100lvh;
   display: flex;
   align-items: center;
   justify-content: center;
