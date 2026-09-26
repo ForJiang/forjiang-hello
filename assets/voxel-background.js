@@ -53,11 +53,14 @@
   // Lit top-face palette for the wordmark light: 24 intensity steps x 101
   // heights, each blended toward white. Pre-computed — zero allocations/frame.
   // 24 steps (not 10) so the per-voxel light has no visible banding.
+  // The blend ceiling is deliberately low (0.4): the pool should read the
+  // terrain without washing it out — the white wordmark must stay the
+  // most legible thing on screen.
   var LIGHT_STEPS = 24;
   var litTopLUT = new Array(LIGHT_STEPS);
   var litRightLUT = new Array(LIGHT_STEPS);
   for (var s = 0; s < LIGHT_STEPS; s++) {
-    var k = (s / (LIGHT_STEPS - 1)) * 0.75; // blend factor toward white
+    var k = (s / (LIGHT_STEPS - 1)) * 0.4; // blend factor toward white
     var col = new Array(101);
     for (var j = 0; j <= 100; j++) {
       var rr = Math.floor((baseRgb.r * (0.55 + (j / 100) * 0.45)) * (1 - k) + 255 * k);
@@ -288,10 +291,11 @@
 
     // Per-pixel light pool: an additive elliptical white gradient over the
     // whole scene — smooth and free of voxel quantization — with a slow
-    // breathing so the light feels alive rather than static
+    // breathing so the light feels alive rather than static. Alpha is kept
+    // low: this is a sheen on the terrain, not a wash.
     if (lightOn) {
       var breathe = 0.88 + 0.12 * Math.sin(time * 0.9);
-      var a0 = 0.1 * lint * breathe;
+      var a0 = 0.045 * lint * breathe;
       if (a0 > 0.004) {
         ctx.save();
         ctx.globalCompositeOperation = "lighter";

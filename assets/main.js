@@ -32,8 +32,8 @@
     window.__helloLight = {
       x: rect.left + rect.width / 2,
       y: rect.top + rect.height / 2,
-      rx: Math.max(60, rect.width * 0.72),
-      ry: Math.max(50, rect.height * 1.45),
+      rx: Math.max(60, rect.width * 0.62),
+      ry: Math.max(50, rect.height * 1.25),
       intensity: intensity,
     };
   }
@@ -84,8 +84,8 @@
       el.classList.add("drawing");
     });
 
-    // Mirrors the reference component's onAnimationComplete: reveal the dock
-    // when the last path finishes drawing
+    // Mirrors the reference component's onAnimationComplete: reveal the clock
+    // and signature when the last path finishes drawing
     completeTimer = window.setTimeout(finish, totalTime() * 1000 + 80);
 
     // The wordmark's glow ramps up as it writes itself

@@ -144,6 +144,26 @@ body.done .clock {
   letter-spacing: 0.14em;
 }
 
+/* ---------- Signature ---------- */
+
+.credit {
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  text-align: center;
+  color: var(--ink-dim);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+
+body.done .credit {
+  opacity: 0.75;
+}
+
 .noscript-fallback {
   position: fixed;
   inset: 0;
@@ -156,10 +176,10 @@ body.done .clock {
 
 /* Reduced motion: show the finished state immediately */
 @media (prefers-reduced-motion: reduce) {
-  .dock {
+  .clock {
     transition: none;
   }
-  .clock {
+  .credit {
     transition: none;
   }
   #hello-svg path.drawing {
