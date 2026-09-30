@@ -25,6 +25,16 @@ html::-webkit-scrollbar {
   display: none;
 }
 
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
 /* Scroll runway, touch devices only: every visual element is fixed, but the
    document itself can scroll ~160px, so a single swipe collapses the mobile
    browser's bottom toolbar and the terrain claims the reclaimed area (the
@@ -134,7 +144,7 @@ html::-webkit-scrollbar {
   transition:
     opacity 0.7s ease,
     transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  pointer-events: none; /* clicks fall through to the replay handler */
+  pointer-events: none; /* decorative overlay, never captures the pointer */
 }
 
 body.done .clock {

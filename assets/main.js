@@ -106,14 +106,8 @@
     document.body.classList.add("done");
   }
 
-  // Clicking anywhere replays (the wordmark is a hollow stroke, so a listener
-  // on the svg alone would miss clicks between the letters) — except on the
-  // bottom zone, which owns its clicks (the fullscreen control)
-  document.addEventListener("click", function (e) {
-    if (e.target.closest && e.target.closest("#bottom")) return;
-    render();
-  });
-
+  // Replay is keyboard-only (R): a click-anywhere replay kept interrupting
+  // the calm of the page, especially accidental taps on mobile
   document.addEventListener("keydown", function (e) {
     if (e.key === "r" || e.key === "R") {
       render();
@@ -176,8 +170,7 @@
     fsBtn.addEventListener("blur", function () {
       fsBtn.classList.remove("is-filling");
     });
-    fsBtn.addEventListener("click", function (e) {
-      e.stopPropagation(); // never replay on a control click
+    fsBtn.addEventListener("click", function () {
       if (document.fullscreenElement) {
         document.exitFullscreen();
       } else {
