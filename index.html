@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>hello — ForJiang</title>
     <meta name="description" content="Apple Hello hand-drawn stroke animation over a voxel topography grid." />
-    <meta name="theme-color" content="#000000" />
+    <!-- No theme-color on purpose: Safari tints its chrome frame (status bar
+         strip + the iOS 26 floating address-bar zone) with it, which paints
+         opaque black bars over the terrain that extends under the chrome.
+         color-scheme keeps the derived chrome appearance dark instead. -->
+    <meta name="color-scheme" content="dark" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css?v=2" />
   </head>
   <body>
     <!-- Background: voxel topography grid (vanilla JS port, see assets/voxel-background.js) -->
@@ -54,8 +58,8 @@
       <p class="noscript-fallback">hello</p>
     </noscript>
 
-    <script src="assets/voxel-background.js" defer></script>
-    <script src="assets/hello-data.js"></script>
-    <script src="assets/main.js" defer></script>
+    <script src="assets/voxel-background.js?v=2" defer></script>
+    <script src="assets/hello-data.js?v=2"></script>
+    <script src="assets/main.js?v=2" defer></script>
   </body>
 </html>
