@@ -170,6 +170,39 @@ body.done .clock {
   letter-spacing: 0.14em;
 }
 
+/* Short landscape viewports (phones rotated sideways, short windows): the
+   bottom-anchored text stack would collide with the centered wordmark, so
+   the wordmark scales with the viewport height and the clock anchors just
+   under it instead of to the bottom edge. 32vh at the 480px boundary ≈ the
+   base clamp maximum, so the wordmark barely changes when crossing it. */
+@media (max-height: 480px) {
+  #hello-svg {
+    height: clamp(80px, 32vh, 168px);
+  }
+
+  .clock {
+    bottom: auto;
+    top: calc(50% + clamp(40px, 16vh, 84px) + 24px);
+    gap: 4px;
+  }
+
+  .clock-time {
+    font-size: clamp(18px, 5vh, 28px);
+  }
+
+  .clock-date {
+    font-size: 10px;
+  }
+
+  .bottom {
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .credit {
+    font-size: 10px;
+  }
+}
+
 /* ---------- Bottom zone: signature + fullscreen control ---------- */
 
 /* Wide invisible hover pad around the signature so the control is easy to
