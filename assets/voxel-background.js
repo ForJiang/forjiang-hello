@@ -80,6 +80,7 @@
   var mouse = { x: -1000, y: -1000, targetX: -1000, targetY: -1000 };
   var width = 0;
   var height = 0;
+  var visibleH = 0; // layout viewport height — what the user actually sees
   var time = 0;
   var lastDpr = 0;
   var lastW = 0;
@@ -96,32 +97,53 @@
     return Math.max(1, dpr);
   }
 
-  // Sizes the canvas from window.inner* (the authoritative visible size) and
-  // mirrors it into the bitmap at an adaptive device pixel ratio. Runs on
-  // resize/orientationchange, on ResizeObserver callbacks, and from the
-  // per-frame guard in draw() — whichever fires first, the result is the same
-  // box. Early-returns when nothing changed so a ResizeObserver callback
-  // caused by our own inline px write cannot loop.
+  // Touch browsers keep a chrome zone BELOW the layout viewport (collapsing
+  // toolbars, iOS 26's floating address capsule, home-indicator insets).
+  // innerHeight excludes it, so a viewport-sized canvas leaves that zone
+  // black — on iOS 26 the terrain visibly stops above the capsule. Extend the
+  // canvas down toward the physical screen height so the terrain always
+  // reaches the bottom edge; capped, because screen.height is unreliable
+  // elsewhere (portrait-locked on iOS, the whole monitor on desktop
+  // touchscreens — the cap bounds the error there).
+  var IS_TOUCH = ("ontouchstart" in window) || (navigator.maxTouchPoints || 0) > 0;
+
+  function targetSize() {
+    var w = Math.max(1, window.innerWidth);
+    var innerH = Math.max(1, window.innerHeight);
+    var h = innerH;
+    if (IS_TOUCH) {
+      var sh = (window.screen && window.screen.height) || 0;
+      h += Math.min(Math.max(sh - innerH, 0), 160);
+    }
+    return { w: w, h: h, innerH: innerH };
+  }
+
+  // Sizes the canvas to targetSize() and mirrors it into the bitmap at an
+  // adaptive device pixel ratio. Runs on resize/orientationchange, on
+  // ResizeObserver callbacks, and from the per-frame guard in draw() —
+  // whichever fires first, the result is the same box. Early-returns when
+  // nothing changed so a ResizeObserver callback caused by our own inline px
+  // write cannot loop.
   function handleResize() {
     // window.inner* is the authoritative visible size: it follows the mobile
     // toolbar show/hide on every browser generation, while a fixed element's
     // CSS 100% stays pinned to the layout viewport on older iOS and leaves a
     // gap when the toolbar collapses. Writing inline px is safe here because
-    // the per-frame guard in draw() re-reads window.inner* every frame, so
-    // this size can never go stale.
-    var w = Math.max(1, window.innerWidth);
-    var h = Math.max(1, window.innerHeight);
-    var dpr = effectiveDpr(w, h);
-    if (w === lastW && h === lastH && dpr === lastDpr) return; // nothing changed
-    lastW = w;
-    lastH = h;
+    // the per-frame guard in draw() re-runs targetSize() every frame, so this
+    // size can never go stale.
+    var t = targetSize();
+    var dpr = effectiveDpr(t.w, t.h);
+    if (t.w === lastW && t.h === lastH && dpr === lastDpr) return; // nothing changed
+    lastW = t.w;
+    lastH = t.h;
     lastDpr = dpr;
-    width = w;
-    height = h;
-    canvas.style.width = w + "px";
-    canvas.style.height = h + "px";
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
+    width = t.w;
+    height = t.h;
+    visibleH = t.innerH;
+    canvas.style.width = t.w + "px";
+    canvas.style.height = t.h + "px";
+    canvas.width = Math.round(t.w * dpr);
+    canvas.height = Math.round(t.h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (reduceMotion) draw(); // static mode: repaint one frame after a resize
   }
@@ -156,12 +178,13 @@
   var invMaxHeight = 1 / (maxHeight + 55);
 
   function draw() {
-    // Per-frame guard: window.inner* changes (mobile toolbar, display zoom,
+    // Per-frame guard: targetSize() changes (mobile toolbar, display zoom,
     // window resize, tab activation transitions) are picked up within a frame
+    var ts = targetSize();
     if (
-      window.innerWidth !== lastW ||
-      window.innerHeight !== lastH ||
-      effectiveDpr(width, height) !== lastDpr
+      ts.w !== lastW ||
+      ts.h !== lastH ||
+      effectiveDpr(ts.w, ts.h) !== lastDpr
     ) {
       handleResize();
     }
@@ -199,7 +222,11 @@
     ctx.fillRect(0, 0, width, height);
 
     var originX = width * 0.5;
-    var originY = height / 3.2;
+    // The terrain composition is anchored to the VISIBLE viewport, not the
+    // extended bitmap: the diamond's top corner and the wave field stay
+    // exactly where a viewport-sized canvas would put them, and the chrome
+    // zone extension below just continues the same grid downward.
+    var originY = (visibleH || height) / 3.2;
 
     // The iso grid spans a DIAMOND in screen space — a voxel maps to
     // (originX + (c-r)*tileW, originY + (c+r)*tileH) — so a range sized from
