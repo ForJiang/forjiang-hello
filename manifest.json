@@ -1,0 +1,21 @@
+{
+  "name": "hello \u2014 ForJiang",
+  "short_name": "hello",
+  "description": "Apple Hello hand-drawn stroke animation over a voxel topography grid.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

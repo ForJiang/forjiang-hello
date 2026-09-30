@@ -16,15 +16,30 @@ body {
   min-height: 100%;
 }
 
-body {
-  background: var(--bg);
-  color: var(--ink);
-  cursor: pointer;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+html {
+  scrollbar-width: none;
+  overscroll-behavior-y: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scroll runway, touch devices only: every visual element is fixed, but the
+   document itself can scroll ~160px, so a single swipe collapses the mobile
+   browser's bottom toolbar and the terrain claims the reclaimed area (the
+   per-frame canvas guard follows the grown viewport). svh keeps the runway
+   relative to the smallest viewport, so it still exists after the toolbar
+   collapses. overscroll-behavior stops pull-to-refresh from fighting the
+   swipe. Desktop keeps a zero-scroll document. */
+@media (hover: none) and (pointer: coarse) {
+  html {
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    min-height: calc(100svh + 160px);
+  }
 }
 
 /* ---------- Background: voxel topography grid ---------- */
@@ -45,8 +60,8 @@ body {
 
 /* ---------- Stage: hello perfectly centered ---------- */
 
-/* Fixed like the canvas so the wordmark is always centered in exactly the
-   area the canvas covers — no document scroll, no toolbar-induced gaps */
+/* Fixed like the canvas so the wordmark stays centered in the visible
+   viewport while the scroll runway moves the document behind it */
 .stage {
   position: fixed;
   top: 0;
