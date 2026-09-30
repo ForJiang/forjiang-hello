@@ -20,13 +20,7 @@
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function hexToRgb(hex) {
-    var cleanHex = hex.replace("#", "");
-    var bigint = parseInt(
-      cleanHex.length === 3
-        ? cleanHex.split("").map(function (c) { return c + c; }).join("")
-        : cleanHex,
-      16,
-    );
+    var bigint = parseInt(hex.replace("#", ""), 16);
     return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
   }
 

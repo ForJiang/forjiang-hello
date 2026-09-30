@@ -90,11 +90,9 @@ html::-webkit-scrollbar {
     drop-shadow(0 0 38px rgba(255, 255, 255, 0.32));
 }
 
-#hello-svg path {
-  stroke-dashoffset: var(--len, 0);
-}
-
-/* Replicates motion's pathLength 0 -> 1: dashoffset runs from full length to 0 */
+/* Replicates motion's pathLength 0 -> 1: dashoffset runs from full length to 0.
+   main.js writes every path's dasharray/dashoffset inline before any paint,
+   so no base rule is needed here. */
 #hello-svg path.drawing {
   animation:
     draw-path var(--dur) var(--ease) var(--delay) both,
