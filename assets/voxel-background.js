@@ -113,11 +113,12 @@
   }
 
   // Sizes the canvas to targetSize() and mirrors it into the bitmap at an
-  // adaptive device pixel ratio. Runs on resize/orientationchange, on
-  // ResizeObserver callbacks, and from the per-frame guard in draw() —
-  // whichever fires first, the result is the same box. Early-returns when
-  // nothing changed so a ResizeObserver callback caused by our own inline px
-  // write cannot loop.
+  // adaptive device pixel ratio. Runs on resize/orientationchange and from
+  // the per-frame guard in draw() — whichever fires first, the result is the
+  // same box. (No ResizeObserver: it observes the canvas's own box, which
+  // only ever changes because this function wrote it, so every callback
+  // would early-return anyway; the two real triggers below plus the guard
+  // cover everything.) Early-returns when nothing changed.
   function handleResize() {
     // window.inner* is the authoritative visible size: it follows the mobile
     // toolbar show/hide on every browser generation, while a fixed element's
@@ -142,8 +143,6 @@
     if (reduceMotion) draw(); // static mode: repaint one frame after a resize
   }
 
-  var resizeObserver = new ResizeObserver(handleResize);
-  resizeObserver.observe(canvas);
   handleResize();
   window.addEventListener("resize", handleResize);
   window.addEventListener("orientationchange", handleResize);

@@ -91,7 +91,6 @@ body {
    (see voxel-background.js) is the wordmark's reflection on the background */
 #hello-svg {
   height: clamp(96px, 22vw, 168px);
-  width: auto;
   max-width: 92vw;
   overflow: visible;
   filter:
