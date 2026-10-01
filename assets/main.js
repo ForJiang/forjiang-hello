@@ -27,15 +27,20 @@
 
   // Publish the wordmark as a light source for the voxel background: position,
   // elliptical reach, and current intensity (viewport CSS pixels, same space
-  // the canvas draws in)
+  // the canvas draws in). The wordmark's box only changes on resize, so the
+  // measured rect is cached and re-read after a resize — re-reading it on
+  // every 80ms ramp tick would force a layout flush each time for a box that
+  // cannot have moved
+  var lightRect = null;
+
   function publishLight(intensity) {
     lightIntensity = intensity;
-    var rect = svg.getBoundingClientRect();
+    if (!lightRect) lightRect = svg.getBoundingClientRect();
     window.__helloLight = {
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-      rx: Math.max(60, rect.width * 0.62),
-      ry: Math.max(50, rect.height * 1.25),
+      x: lightRect.left + lightRect.width / 2,
+      y: lightRect.top + lightRect.height / 2,
+      rx: Math.max(60, lightRect.width * 0.62),
+      ry: Math.max(50, lightRect.height * 1.25),
       intensity: intensity,
     };
   }
@@ -117,7 +122,9 @@
   // ---------- Fullscreen control (OriginButton-style fill) ----------
 
   // Diameter that guarantees the circle covers the button from any origin:
-  // twice the farthest corner distance (ported from the reference component)
+  // twice the farthest corner distance (ported from the reference component).
+  // Callers measure the button rect themselves and pass it in — a pointer
+  // event already needs one measurement, so setFillOrigin must not read again
   function coverDiameter(width, height, x, y) {
     return Math.ceil(
       2 *
@@ -130,8 +137,7 @@
     );
   }
 
-  function setFillOrigin(x, y) {
-    var rect = fsBtn.getBoundingClientRect();
+  function setFillOrigin(rect, x, y) {
     var size = coverDiameter(rect.width, rect.height, x, y);
     fsBtn.style.setProperty("--ox", x + "px");
     fsBtn.style.setProperty("--oy", y + "px");
@@ -140,12 +146,12 @@
 
   function setFillOriginFromPointer(e) {
     var rect = fsBtn.getBoundingClientRect();
-    setFillOrigin(e.clientX - rect.left, e.clientY - rect.top);
+    setFillOrigin(rect, e.clientX - rect.left, e.clientY - rect.top);
   }
 
   function setFillOriginFromCenter() {
     var rect = fsBtn.getBoundingClientRect();
-    setFillOrigin(rect.width / 2, rect.height / 2);
+    setFillOrigin(rect, rect.width / 2, rect.height / 2);
   }
 
   if (fsBtn) {
@@ -185,8 +191,9 @@
     });
   }
 
-  // The wordmark size depends on vw units — re-publish the light on resize
+  // The wordmark size depends on vw units — drop the cached rect and re-publish
   window.addEventListener("resize", function () {
+    lightRect = null;
     publishLight(lightIntensity);
   });
 

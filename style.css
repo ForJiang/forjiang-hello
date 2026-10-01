@@ -32,7 +32,6 @@ body {
     "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
 }
 
 /* Scroll runway, touch devices only: every visual element is fixed, but the
@@ -40,13 +39,9 @@ body {
    browser's bottom toolbar and the terrain claims the reclaimed area (the
    per-frame canvas guard follows the grown viewport). svh keeps the runway
    relative to the smallest viewport, so it still exists after the toolbar
-   collapses. overscroll-behavior stops pull-to-refresh from fighting the
-   swipe. Desktop keeps a zero-scroll document. */
+   collapses. overscroll-behavior is already set on html for all devices.
+   Desktop keeps a zero-scroll document. */
 @media (hover: none) and (pointer: coarse) {
-  html {
-    overscroll-behavior-y: none;
-  }
-
   body {
     min-height: calc(100svh + 160px);
   }
