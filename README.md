@@ -29,6 +29,7 @@ Opening `index.html` directly also works (no external requests).
 - Installed-web-app ready: **Add to Home Screen** runs the page with zero browser chrome and a transparent status bar floating over the terrain
 - Falls back to a plain "hello" text when JavaScript is disabled
 - No frameworks, no build, no external requests; all UI copy is English
+- Boots with zero render-blocking resources: every script is deferred, the single stylesheet is the only other file, and the whole page is about 14 KB gzipped
 
 ## Files
 
@@ -52,6 +53,7 @@ Opening `index.html` directly also works (no external requests).
 - Interaction: replay is keyboard-only (`R`), so pointer gestures never re-trigger the drawing mid-animation.
 - **iOS 26 note**: a WebKit regression (bug 300965) stops `viewport-fit=cover` from extending the page under the status bar, so in Safari the status-bar strip can only show a flat background color, never page content — swipe up once to collapse the bottom toolbar (the scroll runway exists for exactly that), and use **Add to Home Screen** for a fully chromeless screen where the terrain runs edge to edge. There is no `theme-color` on purpose: Safari paints its chrome frame with it, which would add opaque bars over the extended canvas.
 - With `prefers-reduced-motion` the animations are skipped and the finished state renders directly; without JS, `<noscript>` shows the plain text fallback.
+- **Short-viewport layout**: under 480px of viewport height (a phone rotated sideways, a short window) the bottom-anchored text stack would collide with the centered wordmark, so the wordmark scales with `vh` and the clock anchors 24px under it instead of at the bottom edge. The `32vh` scale at the boundary matches the base clamp maximum, so crossing it does not shift the composition.
 
 ## Deployment
 
