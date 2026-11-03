@@ -1,4 +1,5 @@
-// AUTO-GENERATED from the reference Apple Hello motion component (English).
+// AUTO-GENERATED for hello — ForJiang (© 2026 ForJiang) from the reference
+// Apple Hello motion component (English).
 // Path geometry and animation timing are extracted verbatim;
 // do not hand-edit the `d` strings.
 const HELLO_DATA = {

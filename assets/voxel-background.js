@@ -1,4 +1,6 @@
 /**
+ * hello — ForJiang · https://github.com/ForJiang/forjiang-hello · © 2026 ForJiang
+ *
  * Voxel topography background — a line-by-line vanilla JS port of the React
  * component of the same name (no dependencies).
  * Isometric voxel grid: trigonometric height waves with a raised mound under

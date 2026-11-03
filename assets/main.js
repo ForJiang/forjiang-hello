@@ -1,4 +1,6 @@
 /**
+ * hello — ForJiang · https://github.com/ForJiang/forjiang-hello · © 2026 ForJiang
+ *
  * Renders the path data from hello-data.js as a "draws as it reveals" wordmark.
  * Replicates motion/react behavior: pathLength 0->1 is implemented by walking
  * stroke-dashoffset from the full length to 0, with each path's duration /

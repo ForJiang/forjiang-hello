@@ -58,3 +58,11 @@ Opening `index.html` directly also works (no external requests).
 ## Deployment
 
 After pushing to GitHub, set Settings → Pages → Source to `Deploy from a branch`, branch `main`, directory `/`. Note that Pages has a CDN cache of about 10 minutes, so a short delay before the live site updates is normal.
+
+## Author
+
+Built by **ForJiang** — [GitHub](https://github.com/ForJiang) · [Website](https://forjiang.github.io)
+
+Every source file carries the same attribution header. All UI copy and code comments are in English by design.
+
+© 2026 ForJiang
