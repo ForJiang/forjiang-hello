@@ -1,5 +1,11 @@
 # ForJiang — hello
 
+> 零依赖复刻 Apple Hello：全屏体素地形上逐笔手写 hello（按 R 重放），字标是照亮地形的实时光源，附实时时钟；纯 JS 无构建，约 14KB gzip，可添加到主屏幕全屏运行
+>
+> A zero-dependency port of Apple's Hello: strokes hand-drawn over a fullscreen voxel topography grid (R to replay), the wordmark is a live light source on the terrain, with a live clock; no build, ~14 KB gzipped, installable chromeless
+>
+> 中文说明见文末：[中文](#中文)
+
 A zero-dependency static demo page: over a full-screen black-and-gray voxel topography grid, **hello** is hand-drawn stroke by stroke in the center (3.5 seconds); press `R` to draw it again. Nothing else on the page — it is a demo of this one animation.
 
 Live: **https://forjiang.github.io/forjiang-hello/**
@@ -64,5 +70,48 @@ After pushing to GitHub, set Settings → Pages → Source to `Deploy from a bra
 Built by **ForJiang** — [GitHub](https://github.com/ForJiang) · [Website](https://forjiang.github.io)
 
 Every source file carries the same attribution header. All UI copy and code comments are in English by design.
+
+© 2026 ForJiang
+
+---
+
+## 中文
+
+**ForJiang — hello** 是一个零依赖的静态演示页：在全屏黑灰体素地形背景上，单词 hello 在页面正中逐笔手写，3.5 秒写完；页面没有其他内容，就是这个动画的演示。
+
+在线体验：<https://forjiang.github.io/forjiang-hello/>
+
+### 玩法
+
+- 打开页面即自动播放：字标在视口正中逐笔写就；下方是同样白色荧光的实时时钟（`HH:MM:SS` 与日期，每秒刷新）
+- 按 `R` 键重放（仅键盘触发，指针操作不会打断动画）
+- 悬停页面底部签名会出现**全屏**按钮：从指针位置圆形扩散铺满屏幕，并带轻微按压缩放
+
+### 特色
+
+- **全屏体素地形背景**：等距网格 + 三角函数高度波，指针经过处体素隆起（带缓动跟随）；移动端单次下滑收起浏览器底栏，地形自动补满腾出的空间
+- **字标是实时光源**：辉光以逐体素椭圆衰减（smoothstep，24 级 LUT）照亮地形的顶面与右面，另有整幅缓慢呼吸的加亮光池；写字过程中光强渐增，指针悬停在字标上时最亮可达 2 倍——背景随前景实时变化
+- 字标由三层白色光晕（CSS `drop-shadow`）叠出霓虹效果
+- `prefers-reduced-motion: reduce` 下背景只绘制静态一帧，字标直接呈现完成态
+- 禁用 JavaScript 时由 `<noscript>` 回退显示纯文本 "hello"
+- 支持添加到主屏幕（PWA manifest）：以零浏览器边框全屏运行，状态栏透明悬浮在地形之上
+- 无框架、无构建、无外部请求；脚本全部 defer、零渲染阻塞资源，整页 gzip 后约 14 KB
+
+### 本地预览
+
+```bash
+python3 -m http.server 8000
+# 打开 http://localhost:8000
+```
+
+直接双击打开 `index.html` 也可以（无外部请求）。
+
+### 部署
+
+推送到 GitHub 后，在 Settings → Pages → Source 选择 `Deploy from a branch`，分支 `main`、目录 `/` 即可。Pages 的 CDN 缓存约 10 分钟，更新稍有延迟属正常现象。
+
+### 作者
+
+由 **ForJiang** 构建 — [GitHub](https://github.com/ForJiang) · [Website](https://forjiang.github.io)
 
 © 2026 ForJiang
