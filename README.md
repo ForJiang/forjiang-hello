@@ -1,8 +1,8 @@
 # ForJiang — hello
 
-> 零依赖复刻 Apple Hello：全屏体素地形上逐笔手写 hello（按 R 重放），字标是照亮地形的实时光源，附实时时钟；纯 JS 无构建，约 14KB gzip，可添加到主屏幕全屏运行
+> 零依赖复刻 Apple Hello 手写动画：体素地形上字标即光源
 >
-> A zero-dependency port of Apple's Hello: strokes hand-drawn over a fullscreen voxel topography grid (R to replay), the wordmark is a live light source on the terrain, with a live clock; no build, ~14 KB gzipped, installable chromeless
+> Zero-dependency port of Apple's Hello — the handwritten wordmark lights the voxel terrain
 >
 > 中文说明见文末：[中文](#中文)
 
@@ -71,7 +71,7 @@ Built by **ForJiang** — [GitHub](https://github.com/ForJiang) · [Website](htt
 
 Every source file carries the same attribution header. All UI copy and code comments are in English by design.
 
-© 2026 ForJiang
+© 2026 ForJiang · [GPL-3.0](LICENSE)
 
 ---
 
@@ -114,4 +114,4 @@ python3 -m http.server 8000
 
 由 **ForJiang** 构建 — [GitHub](https://github.com/ForJiang) · [Website](https://forjiang.github.io)
 
-© 2026 ForJiang
+© 2026 ForJiang · [GPL-3.0](LICENSE)
